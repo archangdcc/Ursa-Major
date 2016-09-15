@@ -3,11 +3,8 @@ import random
 
 
 def perft(board, depth):
-  pass
+    pass
 
 
 def find_win(board, depth):
-  pass
-
-
-
+    pass
