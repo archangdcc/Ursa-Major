@@ -1,5 +1,5 @@
 class WinPosition:
-    # A possible connet-four on the board
+    # A possible connect-four on the board
     def __init__(self, name):
         self.player = None
         self.value = 0
