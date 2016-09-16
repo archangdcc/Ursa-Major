@@ -124,7 +124,7 @@ class Board:
     def generate_moves(self):
         moves = []
         for i, column in enumerate(self.columns):
-            if (len(column) < 5):
+            if (len(column) < 6):
                 moves.append(i)
         return moves
 
@@ -133,7 +133,7 @@ class Board:
         self.player ^= 1
         self.history.append(move)
         column = self.columns[move]
-        # assert(len(column) < 5)
+        # assert(len(column) < 6)
 
         for pos in self.get_win_positions(move, len(column)):
             pos.push(self.player)
