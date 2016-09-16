@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import random
 
 import board
@@ -37,6 +38,12 @@ def test_Q1():
     # test the unmake operates correctly (assuming __str__() is correct)
     assert(init_str == str(b))
 
+    for i in b.win_positions:
+        for j in i:
+            for k in j:
+                print(k)
+                assert(str(k) == "{}:X-0/0".format(k.name))
+
     # play 1000 random games to test make/unmake return board to start state
     for k in range(1000):
         i = 0
@@ -45,6 +52,9 @@ def test_Q1():
             move = random.choice(moves)
             b.make_move(move)
             i += 1
+        print(b)
+        print(b.last_move_won())
+        print('================================')
         for j in range(i):
             b.unmake_last_move()
         assert(init_str == str(b))

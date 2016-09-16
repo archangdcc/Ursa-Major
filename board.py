@@ -21,6 +21,7 @@ class WinPosition:
         else:
             self.con_value -= 1
         if self.value == 0:
+            assert(self.con_value == 0)
             self.player = None
 
     def win(self):
@@ -84,17 +85,17 @@ def _build_ref_table(col, row):
     for i in _pick(col, 7):
         retvar.append((1, row, i))
 
-    if cpr > -3 and cpr < 1:
+    if cpr >= -2 and cpr <= 0:
         for i in _pick(row, 6 + cpr):
             retvar.append((2, cpr + 2, i))
-    elif cpr > 0 and cpr < 4:
+    elif cpr >= 1 and cpr <= 3:
         for i in _pick(col, 7 - cpr):
             retvar.append((2, cpr + 2, i))
 
-    if cmr > 2 and cmr < 6:
+    if cmr >= 3 and cmr <= 5:
         for i in _pick(row, 1 + cmr):
             retvar.append((3, cmr - 3, i))
-    elif cmr > 5 and cmr < 9:
+    elif cmr >= 6 and cmr <= 8:
         for i in _pick(col, 12 - cmr):
             retvar.append((3, cmr - 3, i))
     return retvar
@@ -102,7 +103,7 @@ def _build_ref_table(col, row):
 
 class Board:
     def __init__(self):
-        self.player = 1
+        self.player = 1  # this player, not the next player
         self.history = []
         self.columns = [[] for i in range(7)]
         self.win = None
@@ -133,7 +134,6 @@ class Board:
         self.history.append(move)
         column = self.columns[move]
         # assert(len(column) < 5)
-        column.append(self.player)
 
         for pos in self.get_win_positions(move, len(column)):
             pos.push(self.player)
@@ -142,16 +142,17 @@ class Board:
             if p.win():
                 self.win = self.player
                 break
+        column.append(self.player)
 
     def unmake_last_move(self):
         # assert(len(self.history) > 0)
         last_move = self.history.pop()
         last_column = self.columns[last_move]
-        self.player ^= 1
+        last_column.pop()
 
         for pos in self.get_win_positions(last_move, len(last_column)):
             pos.pop(self.player)
-        last_column.pop()
+        self.player ^= 1
 
         # Win will stop the game, so the previous move
         # of a win is always non-win.
@@ -164,6 +165,7 @@ class Board:
         # An illustration:
         # 0/1 for the first/second play's move.
         # 'x' for empty tilde.
+
         state = [['' for j in range(7)] for i in range(6)]
         for i, column in enumerate(self.columns):
             j = 0
