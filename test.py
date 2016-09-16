@@ -41,8 +41,7 @@ def test_Q1():
     for i in b.win_positions:
         for j in i:
             for k in j:
-                print(k)
-                assert(str(k) == "{}:X-0/0".format(k.name))
+                assert(str(k)[3:] == ":X-0/0")
 
     # play 1000 random games to test make/unmake return board to start state
     for k in range(1000):
@@ -52,9 +51,11 @@ def test_Q1():
             move = random.choice(moves)
             b.make_move(move)
             i += 1
+
         print(b)
         print(b.last_move_won())
         print('================================')
+
         for j in range(i):
             b.unmake_last_move()
         assert(init_str == str(b))

@@ -1,10 +1,26 @@
 class WinPosition:
     # A possible connect-four on the board
-    def __init__(self, name):
+    def __init__(self, start, direction):
         self.player = None
         self.value = 0
         self.con_value = 0
-        self.name = name
+
+        self.start = start
+        self.direction = direction
+        self.positions = [start]
+        for i in range(1, 4):
+            self.positions.append(
+                (start[0] + i * direction[0],
+                 start[1] + i * direction[1])
+            )
+        if direction == (0, 1):
+            self.catelog = "C"
+        elif direction == (1, 0):
+            self.catelog = "R"
+        elif direction == (1, 1):
+            self.catelog = "M"
+        elif direction == (-1, 1):
+            self.catelog = "P"
 
     def push(self, player):
         if self.player is None:
@@ -31,8 +47,10 @@ class WinPosition:
         return self.con_value != 0
 
     def __str__(self):
-        return "{}:{}-{}/{}".format(
-            self.name,
+        return "{}{}{}:{}-{}/{}".format(
+            self.catelog,
+            self.start[0],
+            self.start[1],
             self.player if self.player is not None else 'X',
             self.value,
             self.con_value
@@ -41,25 +59,25 @@ class WinPosition:
 
 def _generate_win_positions():
     # All the possible connect-four's on the board
-    col_positions = [[WinPosition("C{}{}".format(i, j))
-                      for j in range(3)] for i in range(7)]
-    row_positions = [[WinPosition("R{}{}".format(i, j))
-                      for j in range(4)] for i in range(6)]
+    col_positions = [[WinPosition((c, r), (0, 1))
+                      for r in range(3)] for c in range(7)]
+    row_positions = [[WinPosition((c, r), (1, 0))
+                      for c in range(4)] for r in range(6)]
     cmr_positions = [
-        [WinPosition("M-2{}".format(i)) for i in range(1)],
-        [WinPosition("M-1{}".format(i)) for i in range(2)],
-        [WinPosition("M+0{}".format(i)) for i in range(3)],
-        [WinPosition("M+1{}".format(i)) for i in range(3)],
-        [WinPosition("M+2{}".format(i)) for i in range(2)],
-        [WinPosition("M+3{}".format(i)) for i in range(1)],
+        [WinPosition((0, 2), (1, 1))],
+        [WinPosition((0 + i, 1 + i), (1, 1)) for i in range(2)],
+        [WinPosition((0 + i, 0 + i), (1, 1)) for i in range(3)],
+        [WinPosition((1 + i, 0 + i), (1, 1)) for i in range(3)],
+        [WinPosition((2 + i, 0 + i), (1, 1)) for i in range(2)],
+        [WinPosition((3, 0), (1, 1))],
     ]
     cpr_positions = [
-        [WinPosition("P3{}".format(i)) for i in range(1)],
-        [WinPosition("P4{}".format(i)) for i in range(2)],
-        [WinPosition("P5{}".format(i)) for i in range(3)],
-        [WinPosition("P6{}".format(i)) for i in range(3)],
-        [WinPosition("P7{}".format(i)) for i in range(2)],
-        [WinPosition("P8{}".format(i)) for i in range(1)],
+        [WinPosition((3, 0), (-1, 1))],
+        [WinPosition((4 - i, 0 + i), (-1, 1)) for i in range(2)],
+        [WinPosition((5 - i, 0 + i), (-1, 1)) for i in range(3)],
+        [WinPosition((6 - i, 0 + i), (-1, 1)) for i in range(3)],
+        [WinPosition((6 - i, 1 + i), (-1, 1)) for i in range(2)],
+        [WinPosition((6, 2), (-1, 1))],
     ]
     return [
         col_positions,
@@ -140,7 +158,7 @@ class Board:
 
         for p in self.get_win_positions(move, len(column)):
             if p.win():
-                self.win = self.player
+                self.win = p
                 break
         column.append(self.player)
 
@@ -165,6 +183,7 @@ class Board:
         # An illustration:
         # 0/1 for the first/second play's move.
         # 'x' for empty tilde.
+        # Highlight the win position using ANSI code.
 
         state = [['' for j in range(7)] for i in range(6)]
         for i, column in enumerate(self.columns):
@@ -175,6 +194,11 @@ class Board:
             while j <= 5:
                 state[5 - j][i] = 'x'
                 j += 1
+
+        if self.last_move_won():
+            for c, r in self.win.positions:
+                state[5 - r][c] = '\x1b[1;31m{}\x1b[0m'.format(state[5 - r][c])
+
         return '\n'.join(
             [('|' + ' '.join(s) + '|') for s in state]
         ) + '\n---------------'
