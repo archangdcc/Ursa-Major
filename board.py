@@ -37,7 +37,7 @@ class WinPosition:
         else:
             self.con_value -= 1
         if self.value == 0:
-            assert(self.con_value == 0)
+            # assert(self.con_value == 0)
             self.player = None
 
     def win(self):
@@ -91,34 +91,6 @@ def _pick(m, n, k=4):
     return range(max(m - k + 1, 0), min(m + 1, n - k + 1))
 
 
-def _build_ref_table(col, row):
-    # Return all the possible connect-four's that contain (col, row).
-    retvar = []
-    cpr = col - row
-    cmr = col + row
-
-    for i in _pick(row, 6):
-        retvar.append((0, col, i))
-
-    for i in _pick(col, 7):
-        retvar.append((1, row, i))
-
-    if cpr >= -2 and cpr <= 0:
-        for i in _pick(row, 6 + cpr):
-            retvar.append((2, cpr + 2, i))
-    elif cpr >= 1 and cpr <= 3:
-        for i in _pick(col, 7 - cpr):
-            retvar.append((2, cpr + 2, i))
-
-    if cmr >= 3 and cmr <= 5:
-        for i in _pick(row, 1 + cmr):
-            retvar.append((3, cmr - 3, i))
-    elif cmr >= 6 and cmr <= 8:
-        for i in _pick(col, 12 - cmr):
-            retvar.append((3, cmr - 3, i))
-    return retvar
-
-
 class Board:
     def __init__(self):
         self.player = 1  # this player, not the next player
@@ -129,14 +101,40 @@ class Board:
         self.win_positions = _generate_win_positions()
 
         # Use lookup table to reduce calculation
-        self.ref_table = [[_build_ref_table(c, r) for r in range(6)]
-                          for c in range(7)]
+        self.ref_table = [[self._build_ref_table(c, r)
+                           for r in range(6)] for c in range(7)]
 
-    def get_win_positions(self, col, row):
+    #   def get_win_positions(self, col, row):
+    #       retvar = []
+    #       indexes = self.ref_table[col][row]
+    #       for i, j, k in indexes:
+    #           retvar.append()
+    #       return retvar
+    def _build_ref_table(self, col, row):
+        # Return all the possible connect-four's that contain (col, row).
         retvar = []
-        indexes = self.ref_table[col][row]
-        for i, j, k in indexes:
-            retvar.append(self.win_positions[i][j][k])
+        cpr = col - row
+        cmr = col + row
+
+        for i in _pick(row, 6):
+            retvar.append(self.win_positions[0][col][i])
+
+        for i in _pick(col, 7):
+            retvar.append(self.win_positions[1][row][i])
+
+        if cpr >= -2 and cpr <= 0:
+            for i in _pick(row, 6 + cpr):
+                retvar.append(self.win_positions[2][cpr + 2][i])
+        elif cpr >= 1 and cpr <= 3:
+            for i in _pick(col, 7 - cpr):
+                retvar.append(self.win_positions[2][cpr + 2][i])
+
+        if cmr >= 3 and cmr <= 5:
+            for i in _pick(row, 1 + cmr):
+                retvar.append(self.win_positions[3][cmr - 3][i])
+        elif cmr >= 6 and cmr <= 8:
+            for i in _pick(col, 12 - cmr):
+                retvar.append(self.win_positions[3][cmr - 3][i])
         return retvar
 
     def generate_moves(self):
@@ -153,13 +151,10 @@ class Board:
         column = self.columns[move]
         # assert(len(column) < 6)
 
-        for pos in self.get_win_positions(move, len(column)):
+        for pos in self.ref_table[move][len(column)]:
             pos.push(self.player)
-
-        for p in self.get_win_positions(move, len(column)):
-            if p.win():
-                self.win = p
-                break
+            if pos.win():
+                self.win = pos
         column.append(self.player)
 
     def unmake_last_move(self):
@@ -168,7 +163,7 @@ class Board:
         last_column = self.columns[last_move]
         last_column.pop()
 
-        for pos in self.get_win_positions(last_move, len(last_column)):
+        for pos in self.ref_table[last_move][len(last_column)]:
             pos.pop(self.player)
         self.player ^= 1
 
@@ -183,7 +178,6 @@ class Board:
         # An illustration:
         # 0/1 for the first/second play's move.
         # 'x' for empty tilde.
-        # Highlight the win position using ANSI code.
 
         state = [['' for j in range(7)] for i in range(6)]
         for i, column in enumerate(self.columns):
@@ -197,6 +191,7 @@ class Board:
 
         if self.last_move_won():
             for c, r in self.win.positions:
+                # Highlight the win position using ANSI code.
                 state[5 - r][c] = '\x1b[1;31m{}\x1b[0m'.format(state[5 - r][c])
 
         return '\n'.join(
