@@ -108,10 +108,10 @@ class Board:
         self.win = None
 
         self.win_positions = _generate_win_positions()
-        self.ref_table = [
-            [_build_ref_table(c, r) for r in range(6)]
-            for c in range(7)
-        ]
+
+        # Use lookup table to reduce calculation
+        self.ref_table = [[_build_ref_table(c, r) for r in range(6)]
+                          for c in range(7)]
 
     def get_win_positions(self, col, row):
         retvar = []
@@ -130,12 +130,13 @@ class Board:
     def make_move(self, move):
         # assert(!self.win())
         self.player ^= 1
+        self.history.append(move)
         column = self.columns[move]
         # assert(len(column) < 5)
         column.append(self.player)
+
         for pos in self.get_win_positions(move, len(column)):
             pos.push(self.player)
-        self.history.append(move)
 
         for p in self.get_win_positions(move, len(column)):
             if p.win():
@@ -147,17 +148,22 @@ class Board:
         last_move = self.history.pop()
         last_column = self.columns[last_move]
         self.player ^= 1
+
         for pos in self.get_win_positions(last_move, len(last_column)):
             pos.pop(self.player)
         last_column.pop()
 
-        # Win will stop the game, so the last move of a win is always non-win.
+        # Win will stop the game, so the previous move
+        # of a win is always non-win.
         self.win = None
 
     def last_move_won(self):
         return self.win is not None
 
     def __str__(self):
+        # An illustration:
+        # 0/1 for the first/second play's move.
+        # 'x' for empty tilde.
         state = [['' for j in range(7)] for i in range(6)]
         for i, column in enumerate(self.columns):
             j = 0
