@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import random
+import sys
 
 import board
 import player
@@ -110,7 +111,16 @@ def test_Q4():
 
 
 if __name__ == '__main__':
-    test_Q1()
-    test_Q2()
-    test_Q3()
-    test_Q4()
+    if sys.argv[1] == 'all':
+        test_Q1()
+        test_Q2()
+        test_Q3()
+        test_Q4()
+    elif sys.argv[1] == '1':
+        test_Q1()
+    elif sys.argv[1] == '2':
+        test_Q2()
+    elif sys.argv[1] == '3':
+        test_Q3()
+    elif sys.argv[1] == '4':
+        test_Q4()
