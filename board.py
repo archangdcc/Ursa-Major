@@ -1,83 +1,32 @@
-class WinPosition:
-    # A possible connect-four on the board
-    def __init__(self, start, direction):
-        self.player = None
-        self.value = 0
-        self.con_value = 0
-
-        self.start = start
-        self.direction = direction
-        self.positions = [start]
-        for i in range(1, 4):
-            self.positions.append(
-                (start[0] + i * direction[0],
-                 start[1] + i * direction[1])
-            )
-        if direction == (0, 1):
-            self.catelog = "C"
-        elif direction == (1, 0):
-            self.catelog = "R"
-        elif direction == (1, 1):
-            self.catelog = "M"
-        elif direction == (-1, 1):
-            self.catelog = "P"
-
-    def push(self, player):
-        if self.player is None:
-            self.player = player
-            self.value = 1
-        elif self.player == player:
-            self.value += 1
-        else:
-            self.con_value += 1
-
-    def pop(self, player):
-        if self.player == player:
-            self.value -= 1
-        else:
-            self.con_value -= 1
-        if self.value == 0:
-            # assert(self.con_value == 0)
-            self.player = None
-
-    def win(self):
-        return self.value == 4
-
-    def impossible(self):
-        return self.con_value != 0
-
-    def __str__(self):
-        return "{}{}{}:{}-{}/{}".format(
-            self.catelog,
-            self.start[0],
-            self.start[1],
-            self.player if self.player is not None else 'X',
-            self.value,
-            self.con_value
-        )
-
-
 def _generate_win_positions():
     # All the possible connect-four's on the board
-    col_positions = [[WinPosition((c, r), (0, 1))
+    col_positions = [[{'start': (c, r), 'direction': (0, 1), 'value': [0, 0]}
                       for r in range(3)] for c in range(7)]
-    row_positions = [[WinPosition((c, r), (1, 0))
+    row_positions = [[{'start': (c, r), 'direction': (1, 0), 'value': [0, 0]}
                       for c in range(4)] for r in range(6)]
     cmr_positions = [
-        [WinPosition((0, 2), (1, 1))],
-        [WinPosition((0 + i, 1 + i), (1, 1)) for i in range(2)],
-        [WinPosition((0 + i, 0 + i), (1, 1)) for i in range(3)],
-        [WinPosition((1 + i, 0 + i), (1, 1)) for i in range(3)],
-        [WinPosition((2 + i, 0 + i), (1, 1)) for i in range(2)],
-        [WinPosition((3, 0), (1, 1))],
+        [{'start': (0, 2), 'direction': (1, 1), 'value': [0, 0]}],
+        [{'start': (0 + i, 1 + i), 'direction': (1, 1), 'value': [0, 0]}
+         for i in range(2)],
+        [{'start': (0 + i, 0 + i), 'direction': (1, 1), 'value': [0, 0]}
+         for i in range(3)],
+        [{'start': (1 + i, 0 + i), 'direction': (1, 1), 'value': [0, 0]}
+         for i in range(3)],
+        [{'start': (2 + i, 0 + i), 'direction': (1, 1), 'value': [0, 0]}
+         for i in range(2)],
+        [{'start': (3, 0), 'direction': (1, 1), 'value': [0, 0]}],
     ]
     cpr_positions = [
-        [WinPosition((3, 0), (-1, 1))],
-        [WinPosition((4 - i, 0 + i), (-1, 1)) for i in range(2)],
-        [WinPosition((5 - i, 0 + i), (-1, 1)) for i in range(3)],
-        [WinPosition((6 - i, 0 + i), (-1, 1)) for i in range(3)],
-        [WinPosition((6 - i, 1 + i), (-1, 1)) for i in range(2)],
-        [WinPosition((6, 2), (-1, 1))],
+        [{'start': (3, 0), 'direction': (-1, 1), 'value': [0, 0]}],
+        [{'start': (4 - i, 0 + i), 'direction': (-1, 1), 'value': [0, 0]}
+         for i in range(2)],
+        [{'start': (5 - i, 0 + i), 'direction': (-1, 1), 'value': [0, 0]}
+         for i in range(3)],
+        [{'start': (6 - i, 0 + i), 'direction': (-1, 1), 'value': [0, 0]}
+         for i in range(3)],
+        [{'start': (6 - i, 1 + i), 'direction': (-1, 1), 'value': [0, 0]}
+         for i in range(2)],
+        [{'start': (6, 2), 'direction': (-1, 1), 'value': [0, 0]}],
     ]
     return [
         col_positions,
@@ -139,14 +88,12 @@ class Board:
         return moves
 
     def make_move(self, move):
-        # assert(!self.win())
         self.history.append(move)
         column = self.columns[move]
-        # assert(len(column) < 6)
 
         for pos in self.ref_table[move][len(column)]:
-            pos.push(self.next_player)
-            if pos.win():
+            pos['value'][self.next_player] += 1
+            if pos['value'][self.next_player] == 4:
                 self.win = pos
         column.append(self.next_player)
         self.next_player ^= 1
@@ -159,14 +106,14 @@ class Board:
         self.next_player ^= 1
 
         for pos in self.ref_table[last_move][len(last_column)]:
-            pos.pop(self.next_player)
+            pos['value'][self.next_player] -= 1
 
         # Win will stop the game, so the previous move
         # of a win is always non-win.
         self.win = None
 
     def last_move_won(self):
-        return self.win is not None
+        return self.win
 
     def __str__(self):
         # An illustration:
