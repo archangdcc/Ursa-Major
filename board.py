@@ -81,11 +81,8 @@ class Board:
         return retvar
 
     def generate_moves(self):
-        moves = []
-        for i, column in enumerate(self.columns):
-            if (len(column) < 6):
-                moves.append(i)
-        return moves
+        return [i for i in [3, 2, 4, 1, 5, 0, 6]
+                if len(self.columns[i]) < 6]
 
     def make_move(self, move):
         self.history.append(move)
@@ -113,7 +110,7 @@ class Board:
         self.win = None
 
     def last_move_won(self):
-        return self.win
+        return self.win is not None
 
     def __str__(self):
         # An illustration:
