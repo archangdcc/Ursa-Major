@@ -8,6 +8,29 @@ import random_player
 import search
 
 
+def test_0():
+    print("TEST 0")
+    b = board.Board()
+    state = [['' for j in range(7)] for i in range(6)]
+    for c, column in enumerate(b.ref_table):
+        for r, row in enumerate(column):
+            state[5 - r][c] = "{:2d}".format(len(row))
+            temp = []
+            for pos in row:
+                try:
+                    assert((c, r) in pos.positions)
+                except:
+                    print(str(pos))
+                    exit()
+                temp.append(str(pos)[:3])
+            print('{}{}: {}'.format(c, r, '; '.join(temp)))
+
+    print()
+    print('\n'.join(
+        [('|' + ' '.join(s) + '|') for s in state]
+    ) + '\n---------------')
+
+
 def test_Q1():
     print("TESTING FOR Q1")
     b = board.Board()
@@ -67,6 +90,7 @@ def test_Q2():
     print("TESTING FOR Q2")
     b = board.Board()
     assert(search.perft(b, 1) == 7)
+    assert(search.perft(b, 7) == 823536)
     assert(search.perft(b, 8) == 5686266)
     b.make_move(0)
     b.make_move(2)
@@ -124,3 +148,5 @@ if __name__ == '__main__':
         test_Q3()
     elif sys.argv[1] == '4':
         test_Q4()
+    elif sys.argv[1] == '0':
+        test_0()

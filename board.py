@@ -93,23 +93,17 @@ def _pick(m, n, k=4):
 
 class Board:
     def __init__(self):
-        self.player = 1  # this player, not the next player
+        self.next_player = 0
         self.history = []
         self.columns = [[] for i in range(7)]
         self.win = None
 
         self.win_positions = _generate_win_positions()
 
-        # Use lookup table to reduce calculation
+        # Use pre-build reference table to reduce calculation
         self.ref_table = [[self._build_ref_table(c, r)
                            for r in range(6)] for c in range(7)]
 
-    #   def get_win_positions(self, col, row):
-    #       retvar = []
-    #       indexes = self.ref_table[col][row]
-    #       for i, j, k in indexes:
-    #           retvar.append()
-    #       return retvar
     def _build_ref_table(self, col, row):
         # Return all the possible connect-four's that contain (col, row).
         retvar = []
@@ -123,17 +117,17 @@ class Board:
             retvar.append(self.win_positions[1][row][i])
 
         if cpr >= -2 and cpr <= 0:
-            for i in _pick(row, 6 + cpr):
+            for i in _pick(col, 6 + cpr):
                 retvar.append(self.win_positions[2][cpr + 2][i])
         elif cpr >= 1 and cpr <= 3:
-            for i in _pick(col, 7 - cpr):
+            for i in _pick(row, 7 - cpr):
                 retvar.append(self.win_positions[2][cpr + 2][i])
 
         if cmr >= 3 and cmr <= 5:
             for i in _pick(row, 1 + cmr):
                 retvar.append(self.win_positions[3][cmr - 3][i])
         elif cmr >= 6 and cmr <= 8:
-            for i in _pick(col, 12 - cmr):
+            for i in _pick(6 - col, 12 - cmr):
                 retvar.append(self.win_positions[3][cmr - 3][i])
         return retvar
 
@@ -146,26 +140,26 @@ class Board:
 
     def make_move(self, move):
         # assert(!self.win())
-        self.player ^= 1
         self.history.append(move)
         column = self.columns[move]
         # assert(len(column) < 6)
 
         for pos in self.ref_table[move][len(column)]:
-            pos.push(self.player)
+            pos.push(self.next_player)
             if pos.win():
                 self.win = pos
-        column.append(self.player)
+        column.append(self.next_player)
+        self.next_player ^= 1
 
     def unmake_last_move(self):
         # assert(len(self.history) > 0)
         last_move = self.history.pop()
         last_column = self.columns[last_move]
         last_column.pop()
+        self.next_player ^= 1
 
         for pos in self.ref_table[last_move][len(last_column)]:
-            pos.pop(self.player)
-        self.player ^= 1
+            pos.pop(self.next_player)
 
         # Win will stop the game, so the previous move
         # of a win is always non-win.
