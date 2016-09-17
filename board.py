@@ -81,7 +81,7 @@ class Board:
         return retvar
 
     def generate_moves(self):
-        return [i for i in [3, 2, 4, 1, 5, 0, 6]
+        return [i for i in range(7)
                 if len(self.columns[i]) < 6]
 
     def make_move(self, move):
