@@ -44,7 +44,7 @@ class Board:
     def __init__(self):
         self.next_player = 0
         self.history = []
-        self.columns = [[] for i in range(7)]
+        self.table = [[] for i in range(7)]
         self.win = None
 
         self.win_positions = _generate_win_positions()
@@ -59,12 +59,15 @@ class Board:
         cpr = col - row
         cmr = col + row
 
+        # vertical
         for i in _pick(row, 6):
             retvar.append(self.win_positions[0][col][i])
 
+        # horizontal
         for i in _pick(col, 7):
             retvar.append(self.win_positions[1][row][i])
 
+        # diagonal
         if cpr >= -2 and cpr <= 0:
             for i in _pick(col, 6 + cpr):
                 retvar.append(self.win_positions[2][cpr + 2][i])
@@ -72,6 +75,7 @@ class Board:
             for i in _pick(row, 7 - cpr):
                 retvar.append(self.win_positions[2][cpr + 2][i])
 
+        # back-diagonal
         if cmr >= 3 and cmr <= 5:
             for i in _pick(row, 1 + cmr):
                 retvar.append(self.win_positions[3][cmr - 3][i])
@@ -82,11 +86,11 @@ class Board:
 
     def generate_moves(self):
         return [i for i in range(7)
-                if len(self.columns[i]) < 6]
+                if len(self.table[i]) < 6]
 
     def make_move(self, move):
         self.history.append(move)
-        column = self.columns[move]
+        column = self.table[move]
 
         for pos in self.ref_table[move][len(column)]:
             pos['value'][self.next_player] += 1
@@ -98,7 +102,7 @@ class Board:
     def unmake_last_move(self):
         # assert(len(self.history) > 0)
         last_move = self.history.pop()
-        last_column = self.columns[last_move]
+        last_column = self.table[last_move]
         last_column.pop()
         self.next_player ^= 1
 
@@ -118,17 +122,19 @@ class Board:
         # 'x' for empty tilde.
 
         state = [['' for j in range(7)] for i in range(6)]
-        for i, column in enumerate(self.columns):
-            j = 0
-            while j < len(column):
-                state[5 - j][i] = str(column[j])
-                j += 1
-            while j <= 5:
-                state[5 - j][i] = 'x'
-                j += 1
+        for c, column in enumerate(self.table):
+            r = 0
+            while r < len(column):
+                state[5 - r][c] = str(column[c])
+                r += 1
+            while r <= 5:
+                state[5 - r][c] = 'x'
+                r += 1
 
-        if self.last_move_won():
-            for c, r in self.win.positions:
+        if self.win is not None:
+            for i in range(4):
+                c = self.win['start'][0] + i * self.win['direction'][0]
+                r = self.win['start'][1] + i * self.win['direction'][1]
                 # Highlight the win position using ANSI code.
                 state[5 - r][c] = '\x1b[1;31m{}\x1b[0m'.format(state[5 - r][c])
 

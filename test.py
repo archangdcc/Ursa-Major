@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 import random
 import sys
+import time
+import profile
 
 import board
 import player
 import random_player
 import search
+
+
+b = board.Board()
 
 
 def test_0():
@@ -29,6 +34,20 @@ def test_0():
     print('\n'.join(
         [('|' + ' '.join(s) + '|') for s in state]
     ) + '\n---------------')
+
+
+def test_profile():
+    # search.perft(b, 8)
+    search.find_win(b, 8)
+
+
+def test_find_win():
+    for depth in range(3, 9):
+        b = board.Board()
+        t0 = time.time()
+        search.find_win(b, depth, "dfs")
+        t1 = time.time()
+        print("{} s".format(t1 - t0))
 
 
 def test_Q1():
@@ -62,11 +81,6 @@ def test_Q1():
     # test the unmake operates correctly (assuming __str__() is correct)
     assert(init_str == str(b))
 
-    for i in b.win_positions:
-        for j in i:
-            for k in j:
-                assert(str(k)[3:] == ":X-0/0")
-
     # play 1000 random games to test make/unmake return board to start state
     for k in range(1000):
         i = 0
@@ -90,19 +104,29 @@ def test_Q2():
     print("TESTING FOR Q2")
     b = board.Board()
     assert(search.perft(b, 1) == 7)
+    t0 = time.time()
     assert(search.perft(b, 7) == 823536)
+    t1 = time.time()
+    print("{} s".format(t1 - t0))
     assert(search.perft(b, 8) == 5686266)
+    t2 = time.time()
+    print("{} s".format(t2 - t1))
     b.make_move(0)
     b.make_move(2)
     b.make_move(0)
     assert(search.perft(b, 8) == 5245276)
+    t3 = time.time()
+    print("{} s".format(t3 - t2))
     print("passed")
 
 
 def test_Q3():
-    print("TESTING FOR Q3")
+    print("TESTING FOR Q3-BFS")
     b = board.Board()
+    t0 = time.time()
     assert(search.find_win(b, 8) == "NO FORCED WIN IN 8 MOVES")
+    t1 = time.time()
+    print("{} s".format(t1 - t0))
     b.make_move(2)
     b.make_move(0)
     b.make_move(3)
@@ -150,3 +174,7 @@ if __name__ == '__main__':
         test_Q4()
     elif sys.argv[1] == '0':
         test_0()
+    elif sys.argv[1] == 'p':
+        profile.run("test_profile()")
+    elif sys.argv[1] == 'w':
+        test_find_win()
