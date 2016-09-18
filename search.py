@@ -24,7 +24,10 @@ def find_win_ab(board, a, b, depth):
         return -1
     if depth == 0:
         return 0
-    for move in board.generate_moves():
+    moves = board.generate_moves()
+    if len(moves) == 0:
+        return 0
+    for move in moves:
         board.make_move(move)
         v = - find_win_ab(board, - b, - a, depth - 1)
         board.unmake_last_move()
