@@ -76,8 +76,8 @@ class Board:
 
     def _generate_ref_table(self):
         for c4 in self.c4s:
-            for pos in c4['positions']:
-                self.ref_table[pos[0]][pos[1]].append(c4)
+            for c, r in c4['positions']:
+                self.ref_table[c][r].append(c4)
 
     def generate_moves(self):
         return [i for i in range(7)
@@ -101,8 +101,8 @@ class Board:
         last_column.pop()
         self.next_player ^= 1
 
-        for pos in self.ref_table[last_move][len(last_column)]:
-            pos['value'][self.next_player] -= 1
+        for c4 in self.ref_table[last_move][len(last_column)]:
+            c4['value'][self.next_player] -= 1
 
         # Win will stop the game, so the previous move
         # of a win is always non-win.
@@ -134,3 +134,19 @@ class Board:
         return '\n'.join(
             [('|' + ' '.join(s) + '|') for s in state]
         ) + '\n---------------'
+
+    def make_permanent_move(self, move):
+        row = len(self.table[move])
+        self.make_move(move)
+
+        impossible = []
+        for c4 in self.ref_table[move][row]:
+            if c4['value'][0] > 0 and c4['value'][1] > 0:
+                impossible.append(c4)
+
+        for stale_c4 in impossible:
+            for c, r in stale_c4['positions']:
+                for i, c4 in enumerate(self.ref_table[c][r]):
+                    if c4['cid'] == stale_c4['cid']:
+                        del self.ref_table[c][r][i]
+                        break

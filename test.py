@@ -13,32 +13,62 @@ import search
 b = board.Board()
 
 
-def test_0():
-    print("TEST 0")
-    b = board.Board()
+def test_0(b=board.Board()):
     state = [['' for j in range(7)] for i in range(6)]
     for c, column in enumerate(b.ref_table):
         for r, row in enumerate(column):
             state[5 - r][c] = "{:2d}".format(len(row))
             temp = []
-            for pos in row:
+            for c4 in row:
                 try:
-                    assert((c, r) in pos.positions)
+                    assert((c, r) in c4['positions'])
                 except:
-                    print(str(pos))
+                    print(c4['name'])
                     exit()
-                temp.append(str(pos)[:3])
+                temp.append(c4['name'])
             print('{}{}: {}'.format(c, r, '; '.join(temp)))
 
     print()
     print('\n'.join(
         [('|' + ' '.join(s) + '|') for s in state]
-    ) + '\n---------------')
+    ) + '\n----------------------')
 
 
 def test_profile():
     # search.perft(b, 8)
     search.find_win(b, 8)
+
+
+def test_5():
+    for k in range(1000):
+        i = 0
+        b = board.Board()
+        while not b.last_move_won() and len(b.generate_moves()) > 0:
+            moves = b.generate_moves()
+            move = random.choice(moves)
+            b.make_permanent_move(move)
+            i += 1
+
+        state = [['' for j in range(7)] for i in range(6)]
+        for c, column in enumerate(b.ref_table):
+            for r, row in enumerate(column):
+                state[5 - r][c] = "{:2d}".format(len(row))
+                temp = []
+                for c4 in row:
+                    try:
+                        assert((c, r) in c4['positions'])
+                    except:
+                        print(c4['name'])
+                        exit()
+                    temp.append(c4['name'])
+                print('{}{}: {}'.format(c, r, '; '.join(temp)))
+
+        print()
+        print('\n'.join(
+            [('|' + ' '.join(s) + '|') for s in state]
+        ) + '\n----------------------')
+        print(b)
+        print("============================================")
 
 
 def test_find_win():
@@ -121,7 +151,7 @@ def test_Q2():
 
 
 def test_Q3():
-    print("TESTING FOR Q3-BFS")
+    print("TESTING FOR Q3")
     b = board.Board()
     t0 = time.time()
     assert(search.find_win(b, 8) == "NO FORCED WIN IN 8 MOVES")
@@ -174,6 +204,8 @@ if __name__ == '__main__':
         test_Q4()
     elif sys.argv[1] == '0':
         test_0()
+    elif sys.argv[1] == '5':
+        test_5()
     elif sys.argv[1] == 'p':
         profile.run("test_profile()")
     elif sys.argv[1] == 'w':
