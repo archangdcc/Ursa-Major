@@ -6,11 +6,13 @@ import profile
 
 import board
 import player
+from player import InnerBoard
 import random_player
 import search
 
 
 b = board.Board()
+c = InnerBoard()
 
 
 def test_0(b=board.Board()):
@@ -132,7 +134,8 @@ def test_Q1():
 
 def test_Q2():
     print("TESTING FOR Q2")
-    b = board.Board()
+    # b = board.Board()
+    b = InnerBoard()
     assert(search.perft(b, 1) == 7)
     t0 = time.time()
     assert(search.perft(b, 7) == 823536)
@@ -152,7 +155,8 @@ def test_Q2():
 
 def test_Q3():
     print("TESTING FOR Q3")
-    b = board.Board()
+    # b = board.Board()
+    b = InnerBoard()
     t0 = time.time()
     assert(search.find_win(b, 8) == "NO FORCED WIN IN 8 MOVES")
     t1 = time.time()
@@ -180,12 +184,18 @@ def test_Q4():
         players[0].make_move(move)
         players[1].make_move(move)
         b.make_move(move)
+        # print(b)
         i ^= 1
         legal_moves = b.generate_moves()
     if b.last_move_won():
         print("VICTORY FOR PLAYER " + players[i ^ 1].name())
+        if players[i ^ 1].name() == 'RANDOM':
+            return 2
+        else:
+            return 1
     else:
         print("DRAW")
+        return 0
 
 
 if __name__ == '__main__':
@@ -210,3 +220,10 @@ if __name__ == '__main__':
         profile.run("test_profile()")
     elif sys.argv[1] == 'w':
         test_find_win()
+    elif sys.argv[1] == '1000':
+        stat = [0, 0, 0]
+        n = 1000
+        for i in range(n):
+            result = test_Q4()
+            stat[result] += 1
+        print("\nWIN: {}, LOSE: {}, DRAW: {}".format(stat[2], stat[1], stat[0]))

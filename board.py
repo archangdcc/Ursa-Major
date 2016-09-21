@@ -134,19 +134,3 @@ class Board:
         return '\n'.join(
             [('|' + ' '.join(s) + '|') for s in state]
         ) + '\n---------------'
-
-    def make_permanent_move(self, move):
-        row = len(self.table[move])
-        self.make_move(move)
-
-        impossible = []
-        for c4 in self.ref_table[move][row]:
-            if c4['value'][0] > 0 and c4['value'][1] > 0:
-                impossible.append(c4)
-
-        for stale_c4 in impossible:
-            for c, r in stale_c4['positions']:
-                for i, c4 in enumerate(self.ref_table[c][r]):
-                    if c4['cid'] == stale_c4['cid']:
-                        del self.ref_table[c][r][i]
-                        break

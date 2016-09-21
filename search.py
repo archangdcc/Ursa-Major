@@ -19,34 +19,35 @@ def perft(board, depth):
     return n
 
 
-def find_win_ab(board, a, b, depth, path):
+def find_win_ab(board, a, b, depth):
     if board.last_move_won():
-        return -1, path
+        return -1, []
     if depth == 0:
-        return 0, path
+        return 0, []
     moves = board.generate_moves()
     if len(moves) == 0:
-        return 0, path
+        return 0, []
 
     best_path = []
     for move in moves:
         board.make_move(move)
-        v, sub_path = find_win_ab(board, - b, - a, depth - 1, [move])
+        v, sub_path = find_win_ab(board, - b, - a, depth - 1)
         v = - v
         board.unmake_last_move()
         if v >= b:
-            return b, path
+            return b, []
         if v > a:
+            sub_path.append(move)
             best_path = sub_path
             a = v
-    path.extend(best_path)
-    return a, path
+    return a, best_path
 
 
 def find_win(board, depth):
-    v, path = find_win_ab(board, -2, 2, depth, [])
+    v, path = find_win_ab(board, -2, 2, depth)
+    print(path)
     if v == 1:
-        return "WIN BY PLAYING {}".format(path[0])
+        return "WIN BY PLAYING {}".format(path[-1])
     elif v == -1:
         return "ALL MOVES LOSE"
     else:
