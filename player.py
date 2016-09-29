@@ -7,7 +7,13 @@ class InnerBoard(Board):
     def __init__(self, magic=None):
         super().__init__()
         self.value = 0
+
         self.magic = magic if magic is not None else [0, 1, 4, 9, 1000000]
+
+    def generate_moves(self):
+        # a simple re-order of moves, from center to border
+        return [i for i in [3, 2, 4, 1, 5, 0, 6]
+                if len(self.table[i]) < 6]
 
     def make_move(self, move):
         # rewrite this function, add evaluation of state
@@ -18,6 +24,7 @@ class InnerBoard(Board):
 
         for c4 in self.ref_table[move][len(column)]:
             c4['value'][self.next_player] += 1
+
             # begin
             my_v = c4['value'][self.next_player]
             op_v = c4['value'][self.next_player ^ 1]
@@ -26,16 +33,19 @@ class InnerBoard(Board):
             elif op_v == 0:
                 delta_value += self.magic[my_v] - self.magic[my_v - 1]
             # end
+
             if c4['value'][self.next_player] == 4:
                 self.win = c4
 
+        # begin
         self.value = delta_value - self.value
+        # end
 
         column.append(self.next_player)
         self.next_player ^= 1
 
     def unmake_last_move(self):
-        # assert(len(self.history) > 0)
+        # rewrite this function, add evaluation of state
         last_move = self.history.pop()
         last_column = self.table[last_move]
         last_column.pop()
@@ -44,15 +54,21 @@ class InnerBoard(Board):
         delta_value = 0
         for c4 in self.ref_table[last_move][len(last_column)]:
             c4['value'][self.next_player] -= 1
+
+            # begin
             my_v = c4['value'][self.next_player]
             op_v = c4['value'][self.next_player ^ 1]
             if op_v != 0 and my_v == 0:
                 delta_value += self.magic[op_v]
             elif op_v == 0:
                 delta_value += self.magic[my_v + 1] - self.magic[my_v]
+            # end
 
         self.win = None
+
+        # begin
         self.value = delta_value - self.value
+        # end
 
     def make_permanent_move(self, move):
         # another variety of make_move, delete impossible c4's
@@ -74,12 +90,15 @@ class InnerBoard(Board):
             if c4['value'][self.next_player] == 4:
                 self.win = c4
 
+        # remove impossible c4's
+        # begin
         for stale_c4 in impossible:
             for c, r in stale_c4['positions']:
                 for i, c4 in enumerate(self.ref_table[c][r]):
                     if c4['cid'] == stale_c4['cid']:
                         del self.ref_table[c][r][i]
                         break
+        # end
 
         self.value = delta_value - self.value
         column.append(self.next_player)
@@ -105,11 +124,9 @@ class Player:
             v, path = self.find_win(
                 - self.magic[4] - 1, self.magic[4] + 1, depth)
             time2 = time.time()
-            # print('\t{}'.format(time2 - time1))
-            if (time2 - time1) * 4 + time2 - time0 > 3:
+            if (time2 - time1) * 8 + time2 - time0 > 3:
                 break
             depth += 1
-        # print(time.time() - time0)
         return path[-1]
 
     def find_win(self, a, b, depth):

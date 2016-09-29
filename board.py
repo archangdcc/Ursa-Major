@@ -1,4 +1,5 @@
 def _get_c4(name, start, direction, cid):
+    # return a dictionary contains info about this particular connect-four.
     positions = [
         (start[0] + i * direction[0], start[1] + i * direction[1])
         for i in range(4)
@@ -8,8 +9,8 @@ def _get_c4(name, start, direction, cid):
         'name': name,
         'start': start,
         'direction': direction,
-        'value': [0, 0],
-        'positions': positions,
+        'value': [0, 0],  # positions occupied by each player
+        'positions': positions,  # the four positions in a list
         'cid': cid
     }
 
@@ -55,10 +56,6 @@ def _generate_c4s():
             c4.append(_get_c4(name, (6 - i, i + j), direction, len(c4)))
 
     return c4
-
-
-def _pick(m, n, k=4):
-    return range(max(m - k + 1, 0), min(m + 1, n - k + 1))
 
 
 class Board:

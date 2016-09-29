@@ -45,7 +45,6 @@ def find_win_ab(board, a, b, depth):
 
 def find_win(board, depth):
     v, path = find_win_ab(board, -2, 2, depth)
-    print(path)
     if v == 1:
         return "WIN BY PLAYING {}".format(path[-1])
     elif v == -1:
