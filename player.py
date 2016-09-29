@@ -1,3 +1,9 @@
+# -*- coding: utf-8 -*-
+# File name: player.py
+# Author: Changchang Ding
+# Email: dingchan@indiana.edu
+# Python Version: 3.5.2
+
 import time
 
 from board import Board

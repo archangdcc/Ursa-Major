@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+# File name: board.py
+# Author: Changchang Ding
+# Email: dingchan@indiana.edu
+# Python Version: 3.5.2
+
+
 def _get_c4(name, start, direction, cid):
     # return a dictionary contains info about this particular connect-four.
     positions = [

@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+# File name: search.py
+# Author: Changchang Ding
+# Email: dingchan@indiana.edu
+# Python Version: 3.5.2
+
+
 def perft(board, depth):
     if (board.last_move_won()):
         return 1
