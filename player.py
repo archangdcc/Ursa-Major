@@ -5,6 +5,7 @@
 # Python Version: 3.5.2
 
 import time
+from multiprocessing import Process, Value
 
 from board import Board
 
@@ -115,25 +116,39 @@ class Player:
     def __init__(self, magic=None):
         self.magic = magic if magic is not None else [0, 1, 4, 9, 1000000]
         self.board = InnerBoard(self.magic)
+        self.time = None
 
     def name(self):
         return 'Ursa Major'
 
     def make_move(self, move):
+        self.time = time.time()
         self.board.make_permanent_move(move)
 
     def get_move(self):
-        time0 = time.time()
-        depth = 1
+        if self.time is None:
+            self.time = time.time()
+            make_move_time = 0.005
+        else:
+            make_move_time = time.time() - self.time
+
+        best_move = Value('i', -1)
+        p = Process(target=self.find_win_rec, args=(best_move,))
+        p.start()
+        p.join(2.99 - make_move_time - (time.time() - self.time))
+
+        # The Player object will first be deep-copied in the child,
+        # so terminate it won't break anything. No need to unmake all the moves.
+        p.terminate()
+        return best_move.value
+
+    def find_win_rec(self, best_move):
+        depth = 2
         while True:
-            time1 = time.time()
             v, path = self.find_win(
                 - self.magic[4] - 1, self.magic[4] + 1, depth)
-            time2 = time.time()
-            if (time2 - time1) * 8 + time2 - time0 > 3:
-                break
             depth += 1
-        return path[-1]
+            best_move.value = path[-1]
 
     def find_win(self, a, b, depth):
         if self.board.last_move_won():
