@@ -144,16 +144,18 @@ class Player:
         return best_move.value
 
     def find_win_iter_deepen(self, best_move):
-        depth = 2
+        depth = 1
         path = []
-        while True:
+        while depth <= 42 - len(self.board.history):
             v, path = self.find_win(
                 - self.magic[4] - 1, self.magic[4] + 1,
                 depth, hint=path
             )
             depth += 1
             best_move.value = path[-1]
-            print("Depth: {}, Path: {}".format(depth, path))
+            if v == self.magic[4] or v == - self.magic[4]:
+                # win or lose
+                break
 
     def find_win(self, a, b, depth, hint=[]):
         if self.board.last_move_won():
@@ -168,7 +170,6 @@ class Player:
         best_path = []
         if len(hint) > 0:
             previous_best_move = hint.pop()
-            print(previous_best_move)
             moves.remove(previous_best_move)
             self.board.make_move(previous_best_move)
             v, sub_path = self.find_win(- b, - a, depth - 1, hint)
