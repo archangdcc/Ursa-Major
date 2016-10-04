@@ -133,24 +133,29 @@ class Player:
             make_move_time = time.time() - self.time
 
         best_move = Value('i', -1)
-        p = Process(target=self.find_win_rec, args=(best_move,))
+        p = Process(target=self.find_win_iter_deepen, args=(best_move,))
         p.start()
         p.join(2.99 - make_move_time - (time.time() - self.time))
 
         # The Player object will first be deep-copied in the child,
-        # so terminate it won't break anything. No need to unmake all the moves.
+        # so terminating it won't break anything.
+        # No need to unmake all the moves.
         p.terminate()
         return best_move.value
 
-    def find_win_rec(self, best_move):
+    def find_win_iter_deepen(self, best_move):
         depth = 2
+        path = []
         while True:
             v, path = self.find_win(
-                - self.magic[4] - 1, self.magic[4] + 1, depth)
+                - self.magic[4] - 1, self.magic[4] + 1,
+                depth, hint=path
+            )
             depth += 1
             best_move.value = path[-1]
+            print("Depth: {}, Path: {}".format(depth, path))
 
-    def find_win(self, a, b, depth):
+    def find_win(self, a, b, depth, hint=[]):
         if self.board.last_move_won():
             return - self.magic[4], []
         if depth == 0:
@@ -161,6 +166,21 @@ class Player:
             return 0, []
 
         best_path = []
+        if len(hint) > 0:
+            previous_best_move = hint.pop()
+            print(previous_best_move)
+            moves.remove(previous_best_move)
+            self.board.make_move(previous_best_move)
+            v, sub_path = self.find_win(- b, - a, depth - 1, hint)
+            v = - v
+            self.board.unmake_last_move()
+            if v >= b:
+                return b, []
+            if v > a:
+                sub_path.append(previous_best_move)
+                best_path = sub_path
+                a = v
+
         for move in moves:
             self.board.make_move(move)
             v, sub_path = self.find_win(- b, - a, depth - 1)
