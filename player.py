@@ -10,12 +10,15 @@ from multiprocessing import Process, Value
 from board import Board
 
 
+MAGIC = [0, 1, 10, 100, 10000]
+
+
 class InnerBoard(Board):
     def __init__(self, magic=None):
         super().__init__()
         self.value = 0
 
-        self.magic = magic if magic is not None else [0, 1, 4, 9, 1000000]
+        self.magic = magic if magic is not None else MAGIC
 
     def generate_moves(self):
         # a simple re-order of moves, from center to border
@@ -32,7 +35,7 @@ class InnerBoard(Board):
         for c4 in self.ref_table[move][len(column)]:
             c4['value'][self.next_player] += 1
 
-            # begin
+            # begin evaluation
             my_v = c4['value'][self.next_player]
             op_v = c4['value'][self.next_player ^ 1]
             if op_v != 0 and my_v == 1:
@@ -44,7 +47,7 @@ class InnerBoard(Board):
             if c4['value'][self.next_player] == 4:
                 self.win = c4
 
-        # begin
+        # begin evaluation
         self.value = delta_value - self.value
         # end
 
@@ -62,7 +65,7 @@ class InnerBoard(Board):
         for c4 in self.ref_table[last_move][len(last_column)]:
             c4['value'][self.next_player] -= 1
 
-            # begin
+            # begin evaluation
             my_v = c4['value'][self.next_player]
             op_v = c4['value'][self.next_player ^ 1]
             if op_v != 0 and my_v == 0:
@@ -73,7 +76,7 @@ class InnerBoard(Board):
 
         self.win = None
 
-        # begin
+        # begin evaluation
         self.value = delta_value - self.value
         # end
 
@@ -114,7 +117,7 @@ class InnerBoard(Board):
 
 class Player:
     def __init__(self, magic=None):
-        self.magic = magic if magic is not None else [0, 1, 4, 9, 1000000]
+        self.magic = magic if magic is not None else MAGIC
         self.board = InnerBoard(self.magic)
         self.time = None
 
