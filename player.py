@@ -10,7 +10,8 @@ from multiprocessing import Process, Value
 from board import Board
 
 
-MAGIC = [0, 1, 10, 100, 10000]
+MAGIC = [0, 1, 4, 9, 10000]
+TIMELIMIT = 2.99
 
 
 class InnerBoard(Board):
@@ -138,7 +139,7 @@ class Player:
         best_move = Value('i', -1)
         p = Process(target=self.find_win_iter_deepen, args=(best_move,))
         p.start()
-        p.join(2.99 - make_move_time - (time.time() - self.time))
+        p.join(TIMELIMIT - make_move_time - (time.time() - self.time))
 
         # The Player object will first be deep-copied in the child,
         # so terminating it won't break anything.
@@ -158,6 +159,7 @@ class Player:
             best_move.value = path[-1]
             if v == self.magic[4] or v == - self.magic[4]:
                 # win or lose
+                # print("Win!" if v > 0 else "Lose...")
                 break
 
     def find_win(self, a, b, depth, hint=[]):
