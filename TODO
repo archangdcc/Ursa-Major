@@ -1,0 +1,4 @@
+* hash table: maybe Zobrist hashing
+  ref:
+    https://chessprogramming.wikispaces.com/Transposition+Table
+    https://en.wikipedia.org/wiki/Zobrist_hashing
